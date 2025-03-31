@@ -1,96 +1,58 @@
-# Trufi Core
+# Trufi Core Example
 
-[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
-[![style: lint](https://img.shields.io/badge/style-lint-4BC0F5.svg)](https://pub.dev/packages/lint)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/trufi-association/trufi-app/issues)
-[![Twitter Follow](https://img.shields.io/twitter/follow/TrufiAssoc?style=social)](https://twitter.com/TrufiAssoc)
-[![Flutter Test](https://github.com/trufi-association/trufi-core/actions/workflows/flutter_test.yml/badge.svg?branch=master)](https://github.com/trufi-association/trufi-core/actions/workflows/flutter_test.yml)
+This implementation demonstrates how to use the trufi_core Flutter plugin to build your own public transport app. You can use this folder as a skeleton to start your own app. We assume you have a working [Flutter environment](https://flutter.dev/docs/get-started/install).
 
-A cross-plattform multi-modal public transport app based on open data.
-Built in [Flutter](https://flutter.dev/) by the [Trufi Association](https://www.trufi-association.org/), a social startup.
+## Versions
 
-[<img alt="Trufi Logo" src="assets/images/trufi-logo.png" width="120" />](https://www.trufi-association.org/)
+The example was tested against Flutter 2.8.1 and might cause [problems with Flutter 3](https://github.com/trufi-association/trufi-core/issues/604).
 
-<img src="https://www.trufi.app/wp-content/uploads/2019/02/device_pixel-497x1024.png" width="200" hspace="20"/><img src="https://www.trufi.app/wp-content/uploads/2019/02/device_iphone-507x1024.png" width="200" hspace="20" />
+## Set up the backend
 
-## Get the Trufi App for your city
+The app needs to connect to a backend running on a server to be able to recommend routes. The app does not work without internet connection. But once it fetched the route it can operate without internet connection except for the map background tiles. So you can fetch your route at home and take your ride offline. But anyway you need a backend for the map background tiles and the routing at least. We build the backend called [trufi-server](https://github.com/trufi-association/trufi-server) which you can use. That backend just serves pre-generated data and that needs to be created. This is what we use [trufi-server-resources](https://github.com/trufi-association/trufi-server-resources) for.
 
-The mobile application is currently available for the following cities:
+That requires Linux. You will use Linux anyway on the production server later on. But you can run [Linux in a VM on Windows](https://www.wikihow.com/Install-Ubuntu-on-VirtualBox) or [on Mac](https://www.wikihow.com/Run-Linux-on-a-Mac) if you don’t use Linux natively. We use Debian or Debian favored systems like Ubuntu. Our backend has some debian related dependencies so better decide for Debian.
 
-* Cochabamba, Bolivia - [Website](https://www.trufi.app), [Google Play](https://play.google.com/store/apps/details?id=app.trufi.navigator), [App Store](https://apps.apple.com/bo/app/trufi/id1471411924)
-* Accra, Ghana - [Website](https://www.trotro.app/), [Google Play](https://play.google.com/store/apps/details?id=com.trotro.trotro), [App Store](https://apps.apple.com/bo/app/trotro/id1478620071)
-* Addis Ababa, Ethiopia - [Website](https://addismaptransit.com/)
+## Getting started
 
-Please contact the [Trufi Association](https://www.trufi-association.org/contact/) to get one for your city, too. But if you prefer to do it yourself then see below:
+`pubspec.yaml` references `trufi_core`. Here we use a relative path, in your final application it should look more like this:
 
-### Getting started
+```yaml
+  trufi_core:
+    git:
+      url: https://github.com/trufi-association/trufi-core
+      ref: main
+```
 
-Trufi Core is the base dependency used to create your public transport app. Have a look at the [example](example) implementation that contains further instructions.
+## Modify [lib/main.dart](./example/lib/main.dart)
 
-#### Preparing environment
+`lib/main.dart` is used to bootstrap the application. It sets configuration values, theme colors and runs the app. That's it!
 
-1. Copy the contents of the folder `example` into a new repository. See [trufi-app](https://github.com/trufi-association/trufi-app) for an example because we did it like what described below.
+Our example uses a `assets/cfg/app_config.json` config to keep some values out of the `main.dart`. You will find a blank version you need to copy over. It is also possible to hardcode these values directly in `main.dart`.
 
-2. Modify `pubspec.yml`:
-   Replace the content
+### Search functionality
 
-   ```yaml
-     trufi_core:
-       path: ../
-   ```
+The app supports searching for POIs to start the journey from and to plan the journey to. That can happen offline or online. Offline has the advantage that it saves your user bandwidth because the search will not consume any data. But it comes with the huge disadvantages of having to release a new version of the app everytime you want to update the offline search index. Only use the offline search engine for small cities otherwise the performance of the app will suffer. Online comes with the advantage of always providing the users with a fresh search experience because you can change the index on the backend more frequently. The disadvantage is that the app sends every typed char to the backend through the internet possibly invading users privacy because every request gets logged. Use this if having internet connection does not prove to be any difficulty and internet connection is cheap as in most developed countries.
 
-   with
-   ```yaml
-     trufi_core:
-       git:
-         url: https://github.com/trufi-association/trufi-core.git
-         ref: main
-   ```
+To use offline search POI functionality remove `photonUrl` and generate your own version of the `assets/data/search.json` using [osm-search-data-export](https://github.com/trufi-association/osm-search-data-export).
 
-   to be able to use this library - trufi-core
-   
-3. Prepare your development environment so you can compile it successfully
+To use online search POI functionality remove `searchAssetPath`, set up the backend with the extension [photon](https://github.com/trufi-association/trufi-server/tree/main/extensions/photon) and the necessary builder [photon-data-builder](https://github.com/trufi-association/trufi-server-resources/tree/main/photon-data-builder). Of course you need to adapt the `photonUrl` value.
 
-#### Making necessary modifications
+## Modify assets, theme and config
 
-1. Edit [main.dart](./example/lib/main.dart) and modify the necessary things
-   1. Offline search POI functionality: remove `photonUrl` and generate your own version of the `assets/data/search.json` using [osm-search-data-export](https://github.com/trufi-association/osm-search-data-export).
-   2. Online search POI functionality: remove `searchAssetPath`
+Make necessary modifications to [assets](assets), [theme](lib/theme) and config in the generated [Android](android) and [iOS](ios)  projects e.g, you will want to replace the app icon with yours. 
 
-2. Change [drawer-bg.jpg](./example/assets/images/drawer-bg.jpg)
+Don’t forget to change [assets/images/drawer-bg.jpg](assets/images/drawer-bg.jpg)
 
-## Contributing
+## Run and rock that thing
 
-See [CONTRIBUTING](./CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md) prior to contributing.
+Start the application:
 
-### Translations
+```sh
+$ flutter run
+```
 
-Do not modify the files in [/translations](/translations) they are managed from Lokalise.
-If you need to update the translations checkout the [Translations Update Guide](https://github.com/trufi-association/trufi-core/wiki/Translations-Update-Guide)
-Please reach out to the [Contributers](https://github.com/trufi-association/trufi-core/graphs/contributors) to get access.
-    
-If you need to overwrite translations of the Host app checkout the following article [here](https://github.com/trufi-association/trufi-core/wiki/Custom-Translations).
+## Additional notes
 
-## Complementary projects
+* If you use MapTiler Cloud as your tiles endpoint you can pass in your [MapTiler key](https://cloud.maptiler.com/account/keys) via the `trufiCfg.map.mapTilerKey` setting.
 
-[osm-search-data-export](https://github.com/trufi-association/osm-search-data-export) - Generates offline search data that includes POIs, streets and street junctions. The app currently uses the json-compact format.
-
-[osm-public-transport-export](https://github.com/trufi-association/osm-public-transport-export) - Fetches OSM data and generates GeoJSON and additional files.
-
-[geojson-to-gtfs](https://github.com/trufi-association/geojson-to-gtfs) - Turns generated GeoJSON and additional data into GTFS.
-
-[gtfs-bolivia-cochabamba](https://github.com/trufi-association/gtfs-bolivia-cochabamba) - Config package that internally uses *osm-public-transport-export* and *geojson-to-gtfs* to generate a GTFS file to be used in OTP. Use this as a template to generate your own GTFS.
-
-[OpenTripPlanner](https://github.com/opentripplanner/OpenTripPlanner) - Trip planning server that uses GTFS feeds for routing.
-
-## Free Software
-
-Copyright 2020-present - [Trufi Association](https://www.trufi-association.org/)
-
-This program is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License version 3](./LICENSE) as published by the Free Software Foundation.
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-## Shout-outs
-
-Big thanks to [<img src="https://avatars2.githubusercontent.com/u/14294501?s=200&v=4" alt="" width="16" valign="-3px" /> Lokalise](https://lokalise.com) for supporting our localization efforts with a free Open Source Enterprise plan.
-Thanks to the [FMI - Finnish Meteorological Institute](https://en.ilmatieteenlaitos.fi/open-data) for the Open Weather Data
+* For Android: [Create a key store](https://flutter.dev/docs/deployment/android#signing-the-app) or use an existing key, fill the `android/key.properties` with path and password.
