@@ -24,7 +24,6 @@ void main() async {
             center: const TrufiLatLng(-17.392600, -66.158787),
           ),
           searchAssetPath: "assets/data/search.json",
-          photonUrl: "https://bo-cbba.sa.api.trufi-association.org/photon",
         ),
       ],
       trufiRouter: TrufiRouter(
